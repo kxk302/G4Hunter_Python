@@ -22,8 +22,11 @@ import os, re, sys, getopt
 import time
 import shutil
 import numpy as np
-from matplotlib import pyplot
+
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+
 from Bio import SeqIO
 
  
@@ -198,13 +201,11 @@ class Soft(object):
     """               
     def GetG4(self,line,fileout,liste, Window,k, header, Len ):
         LG4=[]
-        SEQ=">"+header+"\n Start \t End \t Sequence\t Length \t Score\n"
-        fileout.write(SEQ)
         for i in range(len(liste)) :
             if (liste[i]>= float(Window) or liste[i]<= - float(Window)):
                 seq=line[i:i+k]
                 LG4.append(i)
-                self.Write(fileout, i, k ,0,0, seq , k, liste[i])
+                self.Write(fileout, i, k ,0,0, seq , k, liste[i], header)
                 fileout.write("\n")
         return LG4
    
@@ -212,8 +213,6 @@ class Soft(object):
         i,k,I=0,0,0
         a=b=LISTE[i]
         MSCORE=[]
-        SEQ=">"+header+"\nStart\tEnd\tSequence\tLength\tScore\tNBR\n"
-        fileout.write(SEQ)
         if (len(LISTE)>1):
             c=LISTE[i+1]
             while (i< len(LISTE)-2):
@@ -224,7 +223,7 @@ class Soft(object):
                     I=I+1
                     seq=line[a:a+F+k]
                     sequence,liste2=self.BaseScore(seq)
-                    self.Write(fileout, a, k ,F,0, seq ,len(seq) , round(np.mean(liste2),2))
+                    self.Write(fileout, a, k ,F,0, seq ,len(seq) , round(np.mean(liste2),2), header)
                     MSCORE.append(abs(round(np.mean(liste2),2)))
                     fileout.write("\n")  
                     k=0
@@ -235,7 +234,7 @@ class Soft(object):
             I=I+1
             seq=line[a:a+F+k+1]
             sequence,liste2=self.BaseScore(seq)
-            self.Write(fileout, a, k ,F,1, seq ,len(seq) , round(np.mean(liste2),2))
+            self.Write(fileout, a, k ,F,1, seq ,len(seq) , round(np.mean(liste2),2), header)
             MSCORE.append(abs(round(np.mean(liste2),2)))
             fileout.write("\t")
             fileout.write(str(I))
@@ -244,15 +243,15 @@ class Soft(object):
         else:
             I=I+1
             seq=line[a:a+F]
-            self.Write(fileout, a, 0 ,F,0, seq ,len(seq) , liste[a])
+            self.Write(fileout, a, 0 ,F,0, seq ,len(seq) , liste[a], header)
             MSCORE.append(abs(liste[a]))
             fileout.write("\t")
             fileout.write(str(I))
             fileout.write("\n")         
         return MSCORE
     
-    def Write(self,fileout, i, k ,F,X, seq ,long, score):
-        LINE=str(i)+" \t "+str(i+k+F+X)+" \t "+str(seq)+" \t "+str(long)+" \t "+str(score)
+    def Write(self,fileout, i, k ,F,X, seq ,long, score, header):
+        LINE=header + "\t" + str(i)+" \t "+str(i+k+F+X)+" \t " + str(score) + "\t" + str(seq)+" \t "+str(long)
         fileout.write(LINE)
        
     #Len dans le cas ou la sequence fini avec des ----- donc il yaura une erreur
@@ -261,6 +260,7 @@ class Soft(object):
 
 if __name__ == "__main__":
     try:
+        #pdb.set_trace()
         inputfile, outputfile , window, score = main(sys.argv[1:])
         fname=inputfile.split("/")[-1]
         name=fname.split(".")
@@ -273,27 +273,6 @@ if __name__ == "__main__":
         print '\033[1m' +"\n \t Oops! invalide parameters  \n" +'\033[0;0m'
         print "--------------------------------------------------------------------\n"
         sys.exit()
-
-    OPF= os.listdir(outputfile)
-    flag=False
-    for dir in OPF:
-        DIR="Results_"+str(name[0])
-        if dir== DIR:
-            print "true",DIR
-            flag=True
-    if flag==True:
-        shutil.rmtree(outputfile+"/"+DIR+"/")
-        os.makedirs(outputfile+"/"+DIR+"/", mode=0777)        #
-        print '\033[1m' +"\n \t Re-evaluation of G-quadruplex propensity with G4Hunter " +'\033[0;0m'
-        print "\n#####################################"
-        print "#    New Results directory Created  #"
-        print "#####################################\n"
-    else:
-        os.makedirs(outputfile+"/"+DIR+"/", mode=0777)        #
-        print "\n########################################################################"
-        print "#                            Results directory Created                 #"
-        print "########################################################################\n"
-    
     #================================================================
     plot=[]
     fname=inputfile.split("/")[-1]
@@ -302,8 +281,8 @@ if __name__ == "__main__":
     print "\n Input file:", '\033[1m' + filefasta[0]+'\033[0;0m'
     #repertoire des fichiers de sortie
 
-    Res1file= open (outputfile +"/"+DIR+"/"+filefasta[0]+"-W"+ str(window)+"-S"+str(score)+".txt", "w")
-    Res2file= open (outputfile +"/"+DIR+"/"+filefasta[0]+"-Merged.txt", "w")
+    Res1file= open (outputfile +"/"+filefasta[0]+"-W"+ str(window)+"-S"+str(score)+".bed", "w")
+    Res2file= open (outputfile +"/"+filefasta[0]+"-W"+ str(window)+"-S"+str(score)+"-Merged.txt", "w")
     #=========================================
     
     startTime = time.time()
@@ -332,14 +311,14 @@ if __name__ == "__main__":
             malist.append(0)
 
     #soft1.plot2(ScoreListe[0], outputfile +"/Results/")
-    soft1.plot2(malist, outputfile +"/"+DIR+"/", "sc")
-    soft1.plot2(alllist, outputfile +"/"+DIR+"/", "all")
+    soft1.plot2(malist, outputfile +"/", "sc")
+    soft1.plot2(alllist, outputfile +"/", "all")
     """
     filein.close()
     fin=time.time()
 
     print "\n Results files and Score Figure are created in:   "#,fin-startTime, "secondes"
-    print '\033[1m' + outputfile,"/",DIR,"/","\n "+'\033[0;0m'
+    print '\033[1m' + outputfile,"/","\n "+'\033[0;0m'
 
 
     Res1file.close()
