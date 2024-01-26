@@ -1,44 +1,59 @@
-# G4Hunter
+# Environment setup
 
- ([Re-evaluation of G-quadruplex propensity with G4Hunter](http://nar.oxfordjournals.org/content/early/2016/01/19/nar.gkw006.full.pdf+html))
- 
- 
- ([G4-Hunter : un nouvel algorithme pour la prédiction des G-quadruplexes](http://www.theses.fr/2015BORD0197))
+Python 2.7 is required!
 
-Requirements & Obtaining
-------------
+1) Install virtualenv (if not already installed) via the following command:
 
-* Python 2.7 is recommended. 
-* Biopython.
-* Matplotlib ([For installation see ](http://matplotlib.org/users/installing.html))
-* Numpy ([For installation see](http://docs.scipy.org/doc/numpy-1.10.1/user/install.html))
-```
-#To install matplotlib, numpy on Mac os
-sudo pip install matplotlib
-sudo pip install numpy
-```
-* Currently, the tree is hosted on Github, and can be obtained via:
-```
-https://github.com/AnimaTardeb/G4-hunter.git
-```
-### Launching ###
+> pip2 install virtualenv
 
-Follow the instruction bellow:
+2) Create a virtual environment called 'g4h_venv' via the following command:
 
-```
-cd path/to/G4Hunter/repository
-python G4Hunter.py -i <inputfile> -o <outputrepository> -w <window> -s <score threshold>
-```
- 
+> virtualenv --python=python2.7 g4h_venv
 
+3) Activate the virtualenv via the following command:
 
-## Who do I talk to? ##
-------------
-G4Hunter_2012_2015
+> . ./g4h_venv/bin/activate
 
-The best way to get help regarding G4-Hunter is to email:
+4) Install the G4hunter required packges in the virtualenv via the following command:
 
-bedrat.amina@gmail.com
+> pip2 install -r requirements.txt
 
-jean-louis.mergny@inserm.fr 
+5) Create the following directory structures
 
+input
+├── Gorilla_gorilla
+├── Homo_sapiens
+├── Pan_paniscus
+├── Pan_troglodytes
+├── Pongo_abelii
+├── Pongo_pygmaeus
+├── Symphalangus_syndactylus
+
+output
+├── Gorilla_gorilla
+├── Homo_sapiens
+├── Pan_paniscus
+├── Pan_troglodytes
+├── Pongo_abelii
+├── Pongo_pygmaeus
+├── Symphalangus_syndactylus
+
+6) For each species, copy the fasta files (one for each chromosome) to the appropriate folder. Fasta files should be named chr1.fasta, ..., chr22.fatsa, chrX.fasta, and chrY.fasta.
+
+7) Run G4Hunter for all species and all chromosomes via the following command:
+
+> ./scripts/run_g4hunter_primates.sh
+
+This shell script calls ./scripts/G4Hunter.py for for all species and all chromosomes in the ./input folder. The output files are written to the corresponding ./output folder. ./scripts/run_g4hunter_primates.sh takes 6 optional command line parameters, that can be overriden.
+
+a. Window size (defaults to 25)
+b. G4Hunter score (defaults to 1.5)
+c. Species (deaults to "Gorilla_gorilla Pan_troglodytes Symphalangus_syndactylus Homo_sapiens Pongo_abelii Pan_paniscus Pongo_pygmaeus")
+d. Chromosomes (defaults to "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 X Y")
+e. Input folder (defaults to "./input")
+f. Output folder (defaults to "./output")
+
+For each species and each chromosome, 2 output files are created. For eaxmple, for Gorilla_gorilla, chromosome 6, window size 25, and G4Hunter score 1.5, we get the following 2 files:
+
+chr6-W25-S1.5-Merged.txt
+chr6-W25-S1.5.bed

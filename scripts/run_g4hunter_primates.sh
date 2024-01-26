@@ -1,10 +1,9 @@
 #!/bin/bash
 
-#species_list=${1:-"Gorilla_gorilla Pan_troglodytes Symphalangus_syndactylus Homo_sapiens Pongo_abelii Pan_paniscus Pongo_pygmaeus"}
-species_list=${1:-"Homo_sapiens"}
-chromosome_list=${2:-"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 X Y"}
-window_size=${3:-"25"}
-score=${4:-"1.5"}
+window_size=${1:-"25"}
+score=${2:-"1.5"}
+species_list=${3:-"Gorilla_gorilla Pan_troglodytes Symphalangus_syndactylus Homo_sapiens Pongo_abelii Pan_paniscus Pongo_pygmaeus"}
+chromosome_list=${4:-"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 X Y"}
 input_folder=${5:-"./input"}
 output_folder=${6:-"./output"}
 
